@@ -3,6 +3,7 @@ package com.neotrade.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -44,4 +45,12 @@ public class User {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     private Set<String> roles = new HashSet<>();
+
+    @Column (name = "profile_image_url")
+    private String profileImageUrl;
+
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Пожалуйста введите номер телефона")
+    @Pattern(regexp = "'+' 7 777 777 7777",message = "некоректный формат")
+    private String phoneNumber;
 }

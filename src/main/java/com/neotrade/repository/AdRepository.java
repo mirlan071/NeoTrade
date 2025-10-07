@@ -30,5 +30,7 @@ public interface AdRepository extends JpaRepository <Ad, Long> {
     Page <Ad> findByRegion (Region region, Pageable pageable);
 
     Page <Ad> findAllAdc (Pageable pageable);
+
+    List <Ad> findById (List<Long> id);
 }
 

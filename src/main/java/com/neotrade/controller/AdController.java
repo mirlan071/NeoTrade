@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/ads")
@@ -44,12 +45,22 @@ public class AdController {
         return adRepository.save(ad);
     }
 
+    @GetMapping("/{id}")
+    public Ad getAd(@PathVariable Long id) {
+        return adRepository.findById(Long.valueOf(id)).get();
+    }
+
 
     //Получить все объявления
     @GetMapping
     public Page <Ad> getAllAds(Pageable pageable) {
         return adRepository.findAllAdc(pageable);
     }
+
+//    @GetMapping("/phone")
+//    public User getUserPhoneNumbers(@PathVariable String phoneNumber) {
+//        return UserRepository.findPhoneNumber(Stri())
+//    }
 
     @GetMapping("/region/{region}")
     public Page<Ad> getByRegion(
