@@ -97,6 +97,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.antkorwin/common-utils -->
+        <dependency>
+            <groupId>com.antkorwin</groupId>
+            <artifactId>common-utils</artifactId>
+            <version>1.2</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
@@ -116,8 +124,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>3.13.0</version> <!-- ✅ обновлено -->
                 <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                     <release>${java.version}</release>
                     <annotationProcessorPaths>
                         <path>
@@ -132,8 +142,10 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+
             </plugin>
         </plugins>
     </build>
+
 
 </project>

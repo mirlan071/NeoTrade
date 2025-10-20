@@ -7,8 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,41 +15,53 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "users") // чтобы не путаться с системной таблицей user
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Логин обязателен")
-    @Size(min = 3, max = 50, message = "Логин должен содержать от 3 до 50 символов")
+    // Телефон используется как логин
+    @NotBlank(message = "{registration.phone_required}")
+    @Pattern(regexp = "^\\+7\\d{10}$", message = "{validation.phone_pattern}")
     @Column(unique = true, nullable = false)
-    private String username;
+    private String phoneNumber;
 
-    @NotBlank(message = "Пароль обязателен")
+    @NotBlank(message = "{registration.password_required}")
     private String password;
 
-    @NotBlank(message = "Имя обязательно")
+    @NotBlank(message = "{user.firstname_required}")
     private String firstName;
 
-    @NotBlank(message = "Фамилия обязательна")
+    @NotBlank(message = "{user.lastname_required}")
     private String lastName;
 
-    @Email(message = "Некорректный email")
-    @Column(unique = true, nullable = false)
+    @Email(message = "{user.email_invalid}")
+    @Column(unique = true)
     private String email;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role")
-    private Set<String> roles = new HashSet<>();
+    // Заменяем Set<String> roles на одну роль
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.USER;
 
-    @Column (name = "profile_image_url")
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
 
-    @Column(unique = true, nullable = false)
-    @NotBlank(message = "Пожалуйста введите номер телефона")
-    @Pattern(regexp = "'+' 7 777 777 7777",message = "некоректный формат")
-    private String phoneNumber;
+    // Дополнительные поля для продавцов
+    private String companyName;
+    private String contactPerson;
+
+    // Статусы
+    private boolean enabled = true;
+    private boolean phoneVerified = false;
+
+    // Даты
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime lastLogin;
+
+    public boolean isSeller() {
+        return UserRole.SELLER.equals(this.role);
+    }
 }

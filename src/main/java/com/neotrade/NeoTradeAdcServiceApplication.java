@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NeoTradeAbcServiceApplication {
+public class NeoTradeAdcServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NeoTradeAbcServiceApplication.class, args);
+		SpringApplication.run(NeoTradeAdcServiceApplication.class, args);
 	}
 
 }

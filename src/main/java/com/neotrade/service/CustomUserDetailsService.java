@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,20 +19,27 @@ import java.util.stream.Collectors;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final MessageService messageService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + username));
+    public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        messageService.getMessage("auth.user_not_found")
+                ));
 
-        Set<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toSet());
+        Set<GrantedAuthority> authorities = Collections.singleton(
+                new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+        );
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword()) // уже закодированный пароль
-                .authorities(authorities)
-                .build();
+        return new org.springframework.security.core.userdetails.User(
+                user.getPhoneNumber(), // используем телефон как username
+                user.getPassword(),
+                user.isEnabled(),
+                true, // accountNonExpired
+                true, // credentialsNonExpired
+                true, // accountNonLocked
+                authorities
+        );
     }
 }
