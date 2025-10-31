@@ -11,8 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,23 +21,20 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
+        // ИСПРАВЛЕНО: используем findByPhoneNumber вместо findByUsername
         User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         messageService.getMessage("auth.user_not_found")
                 ));
 
-        Set<GrantedAuthority> authorities = Collections.singleton(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
-        );
-
         return new org.springframework.security.core.userdetails.User(
-                user.getPhoneNumber(), // используем телефон как username
+                user.getPhoneNumber(), // username = phoneNumber
                 user.getPassword(),
                 user.isEnabled(),
                 true, // accountNonExpired
                 true, // credentialsNonExpired
                 true, // accountNonLocked
-                authorities
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
     }
 }

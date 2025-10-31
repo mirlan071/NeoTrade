@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,13 +16,39 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@Data
 public class JwtUtil {
 
-    private final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long EXPIRATION = 1000 * 60 * 60; // 1 час
+    private final SecretKey key;
+    private final long expiration;
+
+    // Конструктор с dependency injection
+    public JwtUtil(@Value("${jwt.secret}") String secret,
+                   @Value("${jwt.expiration:3600000}") long expiration) {
+        // Если secret не указан в properties, генерируем новый ключ
+        if (secret != null && !secret.trim().isEmpty()) {
+            this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        } else {
+            this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        }
+        this.expiration = expiration;
+    }
+
+    // Конструктор по умолчанию для обратной совместимости
+    public JwtUtil() {
+        this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        this.expiration = 3600000; // 1 час по умолчанию
+    }
 
     public String generateToken(String phoneNumber) {
         Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, phoneNumber);
+    }
+
+    public String generateToken(String phoneNumber, Long userId, String role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        claims.put("role", role);
         return createToken(claims, phoneNumber);
     }
 
@@ -29,13 +57,21 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(key)
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     public Date extractExpiration(String token) {
@@ -48,7 +84,7 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
+        return Jwts.parser()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
@@ -62,5 +98,17 @@ public class JwtUtil {
     public Boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public Boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

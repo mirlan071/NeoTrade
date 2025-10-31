@@ -54,10 +54,14 @@ public class User {
     private String contactPerson;
 
     // Статусы
+    @Builder.Default
     private boolean enabled = true;
+
+    @Builder.Default
     private boolean phoneVerified = false;
 
     // Даты
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime lastLogin;
 

@@ -66,12 +66,17 @@ public class AuthController {
 
             User user = userService.authenticateUser(request);
 
-            String accessToken = jwtUtil.generateToken(user.getPhoneNumber());
+            // Используем улучшенный метод генерации токена
+            String accessToken = jwtUtil.generateToken(
+                    user.getPhoneNumber(),
+                    user.getId(),
+                    user.getRole().name()
+            );
 
             AuthResponseDTO response = new AuthResponseDTO();
             response.setAccessToken(accessToken);
             response.setTokenType("Bearer");
-            response.setExpiresIn(3600L); // 1 час
+            response.setExpiresIn(jwtUtil.getExpiration() / 1000); // в секундах
             response.setUser(userMapper.toDTO(user));
 
             return ResponseEntity.ok(response);
@@ -82,6 +87,7 @@ public class AuthController {
             );
         }
     }
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {

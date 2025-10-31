@@ -8,10 +8,15 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    // Основной метод для поиска по номеру телефона
     Optional<User> findByPhoneNumber(String phoneNumber);
+
+    // Дополнительные методы
     Optional<User> findByEmail(String email);
-    Optional<User> findByUsername(String username); // оставляем для обратной совместимости
     boolean existsByPhoneNumber(String phoneNumber);
     boolean existsByEmail(String email);
-    boolean existsByUsername(String username);
+
+    // Старый метод (можно оставить для обратной совместимости)
+    //Optional<User> findByUsername(String username);
 }

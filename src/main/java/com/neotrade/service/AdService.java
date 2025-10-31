@@ -1,7 +1,5 @@
 package com.neotrade.service;
 
-
-
 import com.neotrade.model.Ad;
 import com.neotrade.model.User;
 import com.neotrade.repository.AdRepository;
@@ -30,7 +28,10 @@ public class AdService {
         return adRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("не найдено"));
     }
-    public User getUsername (String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));    }
+
+    // ИСПРАВЛЕНО: используем поиск по номеру телефона
+    public User getUserByPhone(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+    }
 }

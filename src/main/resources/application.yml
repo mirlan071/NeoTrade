@@ -5,9 +5,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/neotrade
+    url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
-    password: password
+    password: postgres
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -35,6 +35,7 @@ logging:
 
 app:
   jwt:
+    secret: "your-super-secure-jwt-secret-key-minimum-32-characters-long"
     expiration: 3600000
   upload:
     path: ./uploads
